@@ -1,0 +1,3 @@
+src/Application.vala
+data/first-gtk-app.desktop.in
+data/first-gtk-app.appdata.xml.in
