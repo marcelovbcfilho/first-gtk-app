@@ -12,6 +12,11 @@ public class MyApp : Gtk.Application {
     }
 
     protected override void activate () {
+        var quit_action = new SimpleAction ("quit", null);
+
+        add_action (quit_action);
+        set_accels_for_action ("app.quit",  {"<Control>q", "<Control>w"});
+
         var main_window = new Gtk.ApplicationWindow (this) {
             default_height = 300,
             default_width = 300,
@@ -46,16 +51,28 @@ public class MyApp : Gtk.Application {
             column_spacing = 6,
             row_spacing = 6
         };
+    
+        var headerbar = new Gtk.HeaderBar () {
+            has_subtitle = false,
+            show_close_button = true
+        };
+
+        var button = new Gtk.Button.from_icon_name ("process-stop", Gtk.IconSize.LARGE_TOOLBAR) {
+            action_name = "app.quit"
+        };
+        
+        headerbar.add (button);
 
         // add first row of widgets
-        grid.attach (hello_button, 0, 0, 1, 1);
+        grid.attach (hello_button, 0, 1, 1, 1);
         grid.attach_next_to (hello_label, hello_button, Gtk.PositionType.RIGHT, 1, 1);
 
         // add second row of widgets
-        grid.attach (rotate_button, 0, 1);
+        grid.attach (rotate_button, 0, 2);
         grid.attach_next_to (rotate_label, rotate_button, Gtk.PositionType.RIGHT, 1, 1);
 
         main_window.add (grid);
+        main_window.set_titlebar (headerbar);
 
         hello_button.clicked.connect (() => {
             hello_label.label = _("Hello World!");
@@ -69,6 +86,10 @@ public class MyApp : Gtk.Application {
         });
 
         main_window.show_all ();
+
+        quit_action.activate.connect (() => {
+            main_window.destroy ();
+        });
     }
 
     public static int main (string[] args) {
