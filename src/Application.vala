@@ -6,7 +6,7 @@
 public class MyApp : Gtk.Application {
     public MyApp () {
         Object (
-            application_id: "com.github.marcelovbcfilho.gtk-hello",
+            application_id: "com.github.marcelovbcfilho.first-gtk-app",
             flags: ApplicationFlags.FLAGS_NONE
         );
     }
@@ -20,7 +20,7 @@ public class MyApp : Gtk.Application {
         var main_window = new Gtk.ApplicationWindow (this) {
             default_height = 300,
             default_width = 300,
-            title = _("Hello World")
+            title = _("First gtk app")
         };
 
         //  var grid = new Gtk.Grid () {
@@ -47,6 +47,9 @@ public class MyApp : Gtk.Application {
         var rotate_button = new Gtk.Button.with_label (_("Rotate"));
         var rotate_label = new Gtk.Label (_("Horizontal"));
 
+        var send_notification_button = new Gtk.Button.with_label (_("Notify"));
+        var replace_notification_button = new Gtk.Button.with_label (_("Replace notification"));
+
         var grid = new Gtk.Grid () {
             column_spacing = 6,
             row_spacing = 6
@@ -58,10 +61,17 @@ public class MyApp : Gtk.Application {
         };
 
         var button = new Gtk.Button.from_icon_name ("process-stop", Gtk.IconSize.LARGE_TOOLBAR) {
-            action_name = "app.quit"
+            action_name = "app.quit",
+            tooltip_markup = Granite.markup_accel_tooltip (
+                get_accels_for_action ("app.quit"),
+                "Quit"
+            )
         };
         
         headerbar.add (button);
+
+        grid.attach (send_notification_button, 1, 1, 1, 1);
+        grid.attach (replace_notification_button, 2, 1, 1, 1);
 
         // add first row of widgets
         grid.attach (hello_button, 0, 1, 1, 1);
@@ -84,6 +94,34 @@ public class MyApp : Gtk.Application {
             rotate_label.label = _("Vertical");
             rotate_button.sensitive = false;
         });
+
+        send_notification_button.clicked.connect (() => {
+            var notification = new Notification (_("Hello World"));
+            notification.set_icon (new ThemedIcon ("process-completed"));
+            notification.set_body (_("This is my first notification!"));
+            notification.add_button (_("Quit"), "app.quit");
+            notification.set_priority (NotificationPriority.URGENT);
+        
+            send_notification ("com.github.marcelovbcfilho.first-gtk-app", notification);
+        });
+
+        replace_notification_button.clicked.connect (() => {
+            var notification = new Notification (_("Replacing"));
+            notification.set_icon (new ThemedIcon ("process-completed"));
+            notification.set_body (_("Replace old notification content!"));
+            notification.add_button (_("Quit"), "app.quit");
+            notification.set_priority (NotificationPriority.LOW);
+        
+            send_notification ("com.github.marcelovbcfilho.first-gtk-app", notification);
+        });
+
+        // Dock badge
+        Granite.Services.Application.set_badge_visible.begin (true);
+        Granite.Services.Application.set_badge.begin (100);
+
+        // Charging bar
+        Granite.Services.Application.set_progress_visible.begin (true);
+        Granite.Services.Application.set_progress.begin (0.2f);
 
         main_window.show_all ();
 
